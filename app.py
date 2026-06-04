@@ -367,7 +367,7 @@ inv_nodes = st.sidebar.selectbox(
 
 node_caps = st.sidebar.selectbox(
     "Node Caps",
-    sorted(X["node-caps"].unique())
+    sorted(X["node-caps"].replace("?", None).dropna().astype(str).unique())
 )
 
 deg_malig = st.sidebar.selectbox(
