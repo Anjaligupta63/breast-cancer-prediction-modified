@@ -382,7 +382,7 @@ breast = st.sidebar.selectbox(
 
 breast_quad = st.sidebar.selectbox(
     "Breast Quadrant",
-    sorted(X["breast-quad"].unique())
+   sorted(X["breast-quad"].dropna().astype(str).unique())
 )
 
 irradiate = st.sidebar.selectbox(
