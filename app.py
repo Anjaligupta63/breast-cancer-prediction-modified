@@ -34,10 +34,13 @@ if theme == "Light Mode":
     bg_color = "#ffe6e6"
     card_color = "#ffffff"
     text_color = "#000000"
+    sidebar_color = "#ffffff"
+
 else:
-    bg_color = "#1e1e1e"
-    card_color = "#2d2d2d"
-    text_color = "#ffffff"
+     bg_color = "#0b1220"        # clean dark background
+     card_color = "#1f2937"      # readable card
+     text_color = "#f9fafb"      # soft white text
+     sidebar_color = "#111827"
 
 # ----------------------------
 # CUSTOM CSS
@@ -48,6 +51,7 @@ st.markdown(f"""
 
 .stApp {{
     background-color:{bg_color};
+     color: {text_color};
 }}
 
 .main-header {{
