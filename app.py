@@ -9,11 +9,14 @@ from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-
-# ----------------------------
-# PAGE CONFIG
-# ----------------------------
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    confusion_matrix,
+    classification_report
+)
 
 st.set_page_config(
     page_title="Breast Cancer Hospital Dashboard",
@@ -186,14 +189,15 @@ y_pred = model.predict(
     X_test
 )
 
-accuracy = accuracy_score(
-    y_test,
-    y_pred
-)
+accuracy = accuracy_score(y_test, y_pred)
 
-# ----------------------------
-# DASHBOARD STATISTICS
-# ----------------------------
+precision = precision_score(y_test, y_pred)
+
+recall = recall_score(y_test, y_pred)
+
+f1 = f1_score(y_test, y_pred)
+
+cm = confusion_matrix(y_test, y_pred)
 
 total_patients = len(data)
 
