@@ -14,8 +14,11 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
     f1_score,
+    roc_auc_score,
     confusion_matrix,
-    classification_report
+    classification_report,
+    ConfusionMatrixDisplay,
+    RocCurveDisplay
 )
 
 st.set_page_config(
@@ -24,9 +27,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# ----------------------------
-# THEME TOGGLE
-# ----------------------------
 
 theme = st.sidebar.radio(
     "Theme",
@@ -90,9 +90,6 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------------------
-# HEADER
-# ----------------------------
 
 st.markdown("""
 <div class="main-header">
@@ -101,15 +98,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ----------------------------
-# SIDEBAR LOGO
-# ----------------------------
 
 st.sidebar.markdown("# 🎀 Hospital Panel")
 
-# ----------------------------
-# LOAD DATA
-# ----------------------------
 
 FILE_PATH = "breast-cancer-data.csv"
 data = pd.read_csv(FILE_PATH, sep="\t")
@@ -126,9 +117,6 @@ for col in data.columns:
         .str.strip("'")
     )
 
-# ----------------------------
-# PREPARE DATA
-# ----------------------------
 
 X = data.drop(
     "class",
@@ -140,9 +128,7 @@ y = data["class"].apply(
     1 if x == "recurrence-events"
     else 0
 )
-# ----------------------------
-# TRAIN MODEL
-# ----------------------------
+
 
 categorical_features = X.columns.tolist()
 
@@ -185,19 +171,42 @@ model.fit(
     y_train
 )
 
-y_pred = model.predict(
-    X_test
-)
+# Prediction
+y_pred = model.predict(X_test)
 
+# Prediction Probability
+y_prob = model.predict_proba(X_test)[:,1]
+
+# Metrics
 accuracy = accuracy_score(y_test, y_pred)
 
-precision = precision_score(y_test, y_pred)
+precision = precision_score(
+    y_test,
+    y_pred,
+    zero_division=0
+)
 
-recall = recall_score(y_test, y_pred)
+recall = recall_score(
+    y_test,
+    y_pred,
+    zero_division=0
+)
 
-f1 = f1_score(y_test, y_pred)
+f1 = f1_score(
+    y_test,
+    y_pred,
+    zero_division=0
+)
 
-cm = confusion_matrix(y_test, y_pred)
+roc_auc = roc_auc_score(
+    y_test,
+    y_prob
+)
+
+cm = confusion_matrix(
+    y_test,
+    y_pred
+)
 
 total_patients = len(data)
 
@@ -209,7 +218,44 @@ healthy_cases = (
     total_patients -
     recurrence_cases
 )
+# ----------------------------
+# MODEL PERFORMANCE
+# ----------------------------
 
+st.markdown("---")
+st.header("📈 Model Performance")
+
+col1, col2, col3, col4, col5 = st.columns(5)
+
+with col1:
+    st.metric(
+        "Accuracy",
+        f"{accuracy*100:.2f}%"
+    )
+
+with col2:
+    st.metric(
+        "Precision",
+        f"{precision*100:.2f}%"
+    )
+
+with col3:
+    st.metric(
+        "Recall",
+        f"{recall*100:.2f}%"
+    )
+
+with col4:
+    st.metric(
+        "F1 Score",
+        f"{f1*100:.2f}%"
+    )
+
+with col5:
+    st.metric(
+        "ROC-AUC",
+        f"{roc_auc:.3f}"
+    )
 # ----------------------------
 # ANIMATED CARDS
 # ----------------------------
@@ -250,14 +296,26 @@ with col4:
 
     st.markdown(f"""
     <div class="card">
-    <h3>📊 Accuracy</h3>
-    <h1>{accuracy*100:.2f}%</h1>
+    <h3>🏆 F1 Score</h3>
+    <h1>{f1*100:.2f}%</h1>
     </div>
     """,
     unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
+st.subheader("📊 Confusion Matrix")
 
+fig, ax = plt.subplots(figsize=(5,5))
+
+ConfusionMatrixDisplay(
+    confusion_matrix=cm,
+    display_labels=[
+        "No Recurrence",
+        "Recurrence"
+    ]
+).plot(ax=ax)
+
+st.pyplot(fig)
 # ----------------------------
 # PLOTLY GAUGE METER
 # ----------------------------
@@ -339,6 +397,7 @@ st.plotly_chart(
     fig,
     use_container_width=True
 )
+
 # ----------------------------
 # SINGLE PATIENT PREDICTION
 # ----------------------------
